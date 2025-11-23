@@ -23,15 +23,16 @@ int main() {
 	
 
 	float vertices[] = {
-		0.5f, 0.5, 0.0f,   // Superior direito
-		0.5f, -0.5f, 0.0f, // Inferior direito
-		-0.5f, -0.5f, 0.0f, // Inferior esquerdo
-		-0.5f, 0.5f, 0.0f // Superior esquerdo
+		-0.5f, -0.5f, 0.0f,
+		0.0f, -0.5f, 0.0f,
+		-0.25f, 0.5f, 0.0f,
+		0.5f, -0.5f, 0.0f,
+		0.25f, 0.5f, 0.0f
 	};
 
 	unsigned int indices[] = {
-		0, 1, 3, // Primeiro Triangulo
-		1, 2, 3  // Segundo Triangulo
+		0, 1, 2,
+		1, 3, 4
 	};
 	
 	
@@ -98,7 +99,6 @@ int main() {
 
 		glUseProgram(shaderProgram);
 		glBindVertexArray(VAO);
-		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 		
 		glfwSwapBuffers(window);
