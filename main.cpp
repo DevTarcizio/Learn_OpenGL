@@ -9,17 +9,14 @@
 
 // Definição dos vertices
 GLfloat vertices[] = {
-	-0.5f, -0.5f, 0.0f,
-	0.0f, -0.5f, 0.0f,
-	-0.25f, 0.5f, 0.0f,
-	0.5f, -0.5f, 0.0f,
-	0.25f, 0.5f, 0.0f
+	0.5f, -0.5f, 0.0f, 1.0f, 0.0f, 0.0f,
+	-0.5f, -0.5f, 0.0f, 0.0f, 1.0f, 0.0f,
+	0.0f, 0.5f, 0.0f, 0.0f, 0.0f, 1.0f
 };
 
 // Definição dos indices
 GLuint indices[] = {
-	0, 1, 2,
-	1, 3, 4
+	0, 1, 2
 };
 
 
@@ -54,13 +51,15 @@ int main() {
 	EBO EBO1(indices, sizeof(indices));
 
 	// Linkando o VBO ao VAO para a configuração dos atributos dos vertices
-	VAO1.LinkVBO(VBO1, 0);
+	VAO1.ConfigAttrib(VBO1, 0, 3, GL_FLOAT, 6 * sizeof(float), (void*)0);
+	VAO1.ConfigAttrib(VBO1, 1, 3, GL_FLOAT, 6 * sizeof(float), (void*)(3 * sizeof(float)));
 
 	// Desativando todos os VBO, VAO e EBO
 	VAO1.Unbind();
 	VBO1.Unbind();
 	EBO1.Unbind();
 	
+
 	// Loop principal
 	while (!glfwWindowShouldClose(window)) {
 
@@ -70,10 +69,11 @@ int main() {
 
 		// Ativando o shader program
 		shaderProgram.Activate();
+
 		// Ativando o VAO
 		VAO1.Bind();
 		// Desenhando os elementos
-		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+		glDrawElements(GL_TRIANGLES, 3, GL_UNSIGNED_INT, 0);
 		
 		// Troca de buffers visuais
 		glfwSwapBuffers(window);

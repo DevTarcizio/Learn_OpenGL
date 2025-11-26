@@ -1,5 +1,4 @@
 #include "shaderClass.hpp"
-#include "VBO.hpp"
 
 // Ler o conteudo dos arquivos de shader
 std::string get_file_contents(const char* filename)
@@ -28,35 +27,20 @@ Shader::Shader(const char* vertexFile, const char* fragmentFile) {
 	GLuint vertexShader = glCreateShader(GL_VERTEX_SHADER);
 	glShaderSource(vertexShader, 1, &vertexSource, NULL);
 	glCompileShader(vertexShader);
-
-	// Verificação do shader
-	int successVertex;
-	char infologVertex[512];
-	glGetShaderiv(vertexShader, GL_COMPILE_STATUS, &successVertex);
-	if (!successVertex) {
-		glGetShaderInfoLog(vertexShader, 512, NULL, infologVertex);
-		std::cout << "Erro na compilacao: " << infologVertex << '\n';
-	}
+	CompileErrors(vertexShader, "VERTEX");
 
 	// Cria o fragment shader
 	GLuint fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
 	glShaderSource(fragmentShader, 1, &fragmentSource, NULL);
 	glCompileShader(fragmentShader);
-
-	// Verificação do shader
-	int successFragment;
-	char infologFragment[512];
-	glGetShaderiv(fragmentShader, GL_COMPILE_STATUS, &successFragment);
-	if (!successFragment) {
-		glGetShaderInfoLog(fragmentShader, 512, NULL, infologFragment);
-		std::cout << "Erro na compilacao: " << infologFragment << '\n';
-	}
+	CompileErrors(fragmentShader, "Fragment");
 
 	// Cria e configura o shader program
 	ID = glCreateProgram();
 	glAttachShader(ID, vertexShader);
 	glAttachShader(ID, fragmentShader);
 	glLinkProgram(ID);
+	CompileErrors(ID, "PROGRAM");
 	glDeleteShader(vertexShader);
 	glDeleteShader(fragmentShader);
 }
@@ -67,4 +51,23 @@ void Shader::Activate() {
 
 void Shader::Delete() {
 	glDeleteProgram(ID);
+}
+
+void Shader::CompileErrors(unsigned int shader, const char* type) {
+	int success;
+	char infolog[512];
+	if (strcmp(type, "PROGRAM") != 0) {
+		glGetShaderiv(shader, GL_COMPILE_STATUS, &success);
+		if (!success) {
+			glGetShaderInfoLog(shader, 512, NULL, infolog);
+			std::cout << "Error: " << infolog << '\n';
+		}
+	}
+	else {
+		glGetProgramiv(shader, GL_LINK_STATUS, &success);
+		if (!success) {
+			glGetProgramInfoLog(shader, 512, NULL, infolog);
+			std::cout << "Error: " << infolog << '\n';
+		}
+	}
 }

@@ -17,6 +17,7 @@ class Shader  {
 
 		void Activate();
 		void Delete();
+		void CompileErrors(unsigned int shader, const char* type);
 };
 
 
