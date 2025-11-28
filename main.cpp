@@ -1,10 +1,28 @@
 #include <iostream>
 #include <glad/glad.h>	
 #include <GLFW/glfw3.h>
-#include "shaderSource.hpp"
+#include "shaderClass.hpp"
+#include "VBO.hpp"
+#include "VAO.hpp"
+#include "EBO.hpp"
+
+
+// Definição dos vertices
+GLfloat vertices[] = {
+	0.5f, -0.5f, 0.0f, 1.0f, 0.0f, 0.0f,
+	-0.5f, -0.5f, 0.0f, 0.0f, 1.0f, 0.0f,
+	0.0f, 0.5f, 0.0f, 0.0f, 0.0f, 1.0f
+};
+
+// Definição dos indices
+GLuint indices[] = {
+	0, 1, 2
+};
+
 
 int main() {
 	
+	// Configurações da janela
 	glfwInit();
 
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
@@ -21,90 +39,53 @@ int main() {
 	gladLoadGL();
 	glViewport(0, 0, 800, 500);
 	
+	// Criação dos shaders, passando os caminhos do arquivos como argumentos
+	Shader shaderProgram("vertex.vert", "fragment.frag");
 
-	float vertices[] = {
-		-0.5f, -0.5f, 0.0f,
-		0.0f, -0.5f, 0.0f,
-		-0.25f, 0.5f, 0.0f,
-		0.5f, -0.5f, 0.0f,
-		0.25f, 0.5f, 0.0f
-	};
+	// Criando o VAO e o ativando
+	VAO VAO1;
+	VAO1.Bind();
 
-	unsigned int indices[] = {
-		0, 1, 2,
-		1, 3, 4
-	};
-	
-	
-	unsigned int VAO;
-	glGenVertexArrays(1, &VAO);
-	glBindVertexArray(VAO);
+	// Criando o VBO e o EBO, com seus respectivos parametros
+	VBO VBO1(vertices, sizeof(vertices));
+	EBO EBO1(indices, sizeof(indices));
 
-	unsigned int VBO;
-	glGenBuffers(1, &VBO);
-	glBindBuffer(GL_ARRAY_BUFFER, VBO);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
-	
-	unsigned int EBO;
-	glGenBuffers(1, &EBO);
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
+	// Linkando o VBO ao VAO para a configuração dos atributos dos vertices
+	VAO1.ConfigAttrib(VBO1, 0, 3, GL_FLOAT, 6 * sizeof(float), (void*)0);
+	VAO1.ConfigAttrib(VBO1, 1, 3, GL_FLOAT, 6 * sizeof(float), (void*)(3 * sizeof(float)));
 
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
-	glEnableVertexAttribArray(0);
-
-	glBindBuffer(GL_ARRAY_BUFFER, 0);
-	glBindVertexArray(0);
-
-	unsigned int vertexShader;
-	vertexShader = glCreateShader(GL_VERTEX_SHADER);
-	glShaderSource(vertexShader, 1, &vertexShaderSource, NULL);
-	glCompileShader(vertexShader);
-
-	int successVertex;
-	char infologVertex[512];
-	glGetShaderiv(vertexShader, GL_COMPILE_STATUS, &successVertex);
-	if (!successVertex) {
-		glGetShaderInfoLog(vertexShader, 512, NULL, infologVertex);
-		std::cout << "Erro na compilacao: " << infologVertex << '\n';
-	}
-
-	unsigned int fragmentShader;
-	fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
-	glShaderSource(fragmentShader, 1, &fragmentShaderSource, NULL);
-	glCompileShader(fragmentShader);
-
-	int successFragment;
-	char infologFragment[512];
-	glGetShaderiv(fragmentShader, GL_COMPILE_STATUS, &successFragment);
-	if (!successFragment) {
-		glGetShaderInfoLog(fragmentShader, 512, NULL, infologFragment);
-		std::cout << "Erro na compilacao: " << infologFragment << '\n';
-	}
-
-	unsigned int shaderProgram;
-	shaderProgram = glCreateProgram();
-	glAttachShader(shaderProgram, vertexShader);
-	glAttachShader(shaderProgram, fragmentShader);
-	glLinkProgram(shaderProgram);
-	glDeleteShader(vertexShader);
-	glDeleteShader(fragmentShader);
-
+	// Desativando todos os VBO, VAO e EBO
+	VAO1.Unbind();
+	VBO1.Unbind();
+	EBO1.Unbind();
 	
 
+	// Loop principal
 	while (!glfwWindowShouldClose(window)) {
 
+		// Definindo a cor do background
 		glClearColor(0.07f, 0.13f, 0.17f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT);
 
-		glUseProgram(shaderProgram);
-		glBindVertexArray(VAO);
-		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+		// Ativando o shader program
+		shaderProgram.Activate();
+
+		// Ativando o VAO
+		VAO1.Bind();
+		// Desenhando os elementos
+		glDrawElements(GL_TRIANGLES, 3, GL_UNSIGNED_INT, 0);
 		
+		// Troca de buffers visuais
 		glfwSwapBuffers(window);
+		// Captura de eventos
 		glfwPollEvents();
 	}
 
+	// Liberando recursos
+	VAO1.Delete();
+	VBO1.Delete();
+	EBO1.Delete();
+	shaderProgram.Delete();
 
 	glfwDestroyWindow(window);
 	glfwTerminate();
